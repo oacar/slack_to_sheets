@@ -30,12 +30,13 @@ def message(payload):
     text = event.get("text")
     result = slack_web_client.users_profile_get(user=user_id)
     user_name = result['profile']['real_name']
-    print("hello_main func")
+    #print("hello_main func")
     if text and 'https' in text.lower():
         paper_title, paper_link=get_paper_title(text)
         rows = [user_name, paper_link, paper_title.text]
         #print(rows)
         append_to_sheets(rows)
+        print("success")
 
 if __name__ == "__main__":
     logger = logging.getLogger()
