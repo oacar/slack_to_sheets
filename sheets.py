@@ -1,8 +1,11 @@
 from __future__ import print_function
 import pickle
 import os.path
+import gspread
+import json
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
+from oauth2client.service_account import ServiceAccountCredentials
 from google.auth.transport.requests import Request
 
 # If modifying these scopes, delete the file token.pickle.
@@ -22,35 +25,41 @@ def append_to_sheets(rows):
         with open('token.pickle', 'rb') as token:
             creds = pickle.load(token)
     # If there are no (valid) credentials available, let the user log in.
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                '/Users/omeracar//Downloads/credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
+    if not creds:
+        json_creds = os.getenv("GOOGLE_SHEETS_CREDS_JSON")
+        creds_dict = json.loads(json_creds)
+        creds_dict["private_key"] = creds_dict["private_key"].replace("\\\\n", "\n")
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, SCOPES)
+            
         # Save the credentials for the next run
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
+    client = gspread.authorize(creds)
+    # Find a workbook by url
+    spreadsheet = client.open_by_url("https://docs.google.com/spreadsheets/d/1MI-6aQDmTEfEEhYclf9gKzGBHqlOIaSnKf6THs-334Q/edit#gid=0")
+    sheet = spreadsheet.sheet1
 
-    service = build('sheets', 'v4', credentials=creds)
+    # Extract and print all of the values
+#    rows = sheet.get_all_records()
+    #service = build('sheets', 'v4', credentials=creds)
 
+    sheet.append_row(rows)
     # Call the Sheets API
-    sheet = service.spreadsheets()
+    #sheet = service.spreadsheets()
 #    result = sheet.values().get(spreadsheetId='1MI-6aQDmTEfEEhYclf9gKzGBHqlOIaSnKf6THs-334Q',
 #    range='Sheet1!A1:B2').execute()
 #    values = result.get('values', [])
 #    rows = [['omer','ssss']]
-    print('hello')
-    sheet.values().append(
-        spreadsheetId='1MI-6aQDmTEfEEhYclf9gKzGBHqlOIaSnKf6THs-334Q',
-        range="Sheet1!A:Z",
-        body={
-            "majorDimension": "ROWS",
-            "values": rows
-        },
-        valueInputOption="USER_ENTERED"
-    ).execute()
+#    print(rows)
+    # sheet.values().append(
+    #     spreadsheetId='1MI-6aQDmTEfEEhYclf9gKzGBHqlOIaSnKf6THs-334Q',
+    #     range="Sheet1!A:Z",
+    #     body={
+    #         "majorDimension": "ROWS",
+    #         "values": rows
+    #     }#,
+    #     #valueInputOption="USER_ENTERED"
+    # ).execute()
 
 def main():
     rows = [['1','2','3']]
