@@ -15,7 +15,7 @@ def append_to_sheets(rows):
     """Shows basic usage of the Sheets API.
     Prints values from a sample spreadsheet.
     """
-    if len(rows[0])!=3:
+    if len(rows)!=3:
         pass
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is

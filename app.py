@@ -33,7 +33,7 @@ def message(payload):
     print("hello_main func")
     if text and 'https' in text.lower():
         paper_title, paper_link=get_paper_title(text)
-        rows = [[user_name, paper_link, paper_title.text]]
+        rows = [user_name, paper_link, paper_title.text]
         #print(rows)
         append_to_sheets(rows)
 
